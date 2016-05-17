@@ -20,7 +20,7 @@ var ImageManager = require('../lib/docker/image_manager');
 
 
 // Available target configurations.
-var allowedHosts = ['aws', 'test'];
+var allowedHosts = ['aws', 'test', 'local'];
 
 // All overridable configuration options from the CLI.
 var overridableFields = [
