@@ -11,6 +11,8 @@ Vagrant.configure("2") do |config|
   echo 'export TASKCLUSTER_ACCESS_TOKEN="#{ENV['TASKCLUSTER_ACCESS_TOKEN']}"' >> /home/vagrant/.bash_profile
   echo 'export PULSE_USERNAME="#{ENV['PULSE_USERNAME']}"' >> /home/vagrant/.bash_profile
   echo 'export PULSE_PASSWORD="#{ENV['PULSE_PASSWORD']}"' >> /home/vagrant/.bash_profile
+  echo 'export AWS_ACCESS_KEY_ID="#{ENV['AWS_ACCESS_KEY_ID']}"' >> /home/vagrant/.bash_profile
+  echo 'export AWS_SECRET_ACCESS_KEY="#{ENV['AWS_SECRET_ACCESS_KEY']}"' >> /home/vagrant/.bash_profile
 
 SCRIPT
 

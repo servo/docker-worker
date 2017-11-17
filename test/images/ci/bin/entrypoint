@@ -40,3 +40,5 @@ export TASKCLUSTER_CLIENT_ID=$(curl -s http://taskcluster/secrets/v1/secret/repo
 export TASKCLUSTER_ACCESS_TOKEN=$(curl -s http://taskcluster/secrets/v1/secret/repo:github.com/taskcluster/docker-worker:ci-creds | jq -r '.secret.access_token')
 export PULSE_USERNAME=$(curl -s http://taskcluster/secrets/v1/secret/repo:github.com/taskcluster/docker-worker:pulse-creds | jq -r '.secret.username')
 export PULSE_PASSWORD=$(curl -s http://taskcluster/secrets/v1/secret/repo:github.com/taskcluster/docker-worker:pulse-creds | jq -r '.secret.password')
+export AWS_ACCESS_KEY_ID=AKIAIPX2NE5BSJRTMREA
+export AWS_SECRET_ACCESS_KEY=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

@@ -4,7 +4,7 @@ suite('upload to s3 test', function () {
   let temporary = require('temporary');
   let fs = require('fs');
   let path = require('path');
-  let https = require('https');
+  let http = require('http');
 
   async function getTemporaryStream(filename, data) {
     let tempStream = fs.createWriteStream(filename);
@@ -23,14 +23,11 @@ suite('upload to s3 test', function () {
     let tempFile = new temporary.File();
     let resultFile = new temporary.File();
 
-    let server = https.createServer({
-      key: fs.readFileSync(path.join(__dirname, 'fixtures', 'ssl_cert.key')),
-      cert: fs.readFileSync(path.join(__dirname, 'fixtures', 'ssl_cert.crt'))
-    });
+    let server = http.createServer();
 
     let requestState = 0;
-    server.on('request', function(request, response) {
-      let finishRequest = function(status) {
+    server.on('request', (request, response) => {
+      let finishRequest = status => {
         response.writeHead(status);
         response.end();
       };
@@ -39,7 +36,7 @@ suite('upload to s3 test', function () {
         finishRequest(405);
       } else if (!requestState) {
         requestState++;
-        finishRequest(501);
+        finishRequest(500);
       } else {
         requestState++;
         new Promise(function(accept, reject) {
@@ -56,6 +53,27 @@ suite('upload to s3 test', function () {
       }
     });
 
+    const queue = {
+      async createArtifact(taskId, runId, name, body) {
+        return {
+          storageType: 'blob',
+          expires: 'foo',
+          requests: [{
+            url: 'http://localhost:8000',
+            method: 'PUT',
+            headers: {}
+          }]
+        };
+      },
+
+      async completeArtifact() {
+      },
+
+      buildUrl(method, taskId, runId, name) {
+        return 'https://localhost:8000';
+      }
+    };
+
     await new Promise(function(accept, reject) {
       server.on('listening', accept);
       server.on('error', reject);
@@ -66,19 +84,19 @@ suite('upload to s3 test', function () {
     expiry.setDate(expiry.getDate() + 1);
 
     let httpHeader = {
+      'content-type': 'text/plain',
       'content-length': DATA.length
     }
 
     try {
       await uploadToS3(
-        undefined,  // since putUrl is supplied, this is unused
-        1,
+        queue,  // since putUrl is supplied, this is unused
+        'foo',
         0,
         await getTemporaryStream(tempFile.path, DATA),
         "public/foo",
         expiry,
         httpHeader,
-        'https://localhost:8000',
         {rejectUnauthorized: false}
       );
 

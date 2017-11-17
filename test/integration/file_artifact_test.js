@@ -270,8 +270,8 @@ suite('artifact extration tests', () => {
     assert.equal(result.run.reasonResolved, 'completed', 'task should be unsuccessful');
 
     // Ensure these have no errors...
-    assert.equal(result.artifacts['public/username.txt'].storageType, 's3');
-    assert.equal(result.artifacts['public/passwd.txt'].storageType, 's3');
+    assert.equal(result.artifacts['public/username.txt'].storageType, 'blob');
+    assert.equal(result.artifacts['public/passwd.txt'].storageType, 'blob');
 
     // Missing artifact should have an error...
     assert.equal(result.artifacts['public/my-missing.txt'].storageType, 'error');

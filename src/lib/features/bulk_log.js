@@ -26,13 +26,10 @@ class BulkLog {
   }
 
   async created(task) {
-    // Eventually we want to save the content as gzip on s3 or azure so we
-    // incrementally compress it via streams.
-    var gzip = zlib.createGzip();
 
     // Pipe the task stream to a temp file on disk.
     this.stream = fs.createWriteStream(this.file.path);
-    task.stream.pipe(gzip).pipe(this.stream);
+    task.stream.pipe(this.stream);
   }
 
   async killed(task) {
