@@ -66,6 +66,31 @@
         "Release":    "Latest",
         "Revision":   "{{user `workerRevision`}}"
       }
+    },
+    {
+      "type": "amazon-ebs",
+      "name": "hvm-builder",
+      "region": "us-west-2",
+      "source_ami": "ami-25cf1c5d",
+      "ami_virtualization_type": "hvm",
+      "instance_type": "m5.large",
+      "ssh_username": "ubuntu",
+      "ami_name": "taskcluster-docker-worker-base {{timestamp}}",
+      "tags": {
+        "OS_Version": "Ubuntu",
+        "Release":    "Latest",
+        "Revision":   "{{user `workerRevision`}}"
+      }
+    },
+    {
+      "type": "googlecompute",
+      "project_id": "taskcluster-playground",
+      "source_image_family": "ubuntu-1404-lts",
+      "ssh_username": "ubuntu",
+      "zone": "us-west1-b",
+      "image_family": "docker-worker-base",
+      "image_name": "docker-worker-base-{{timestamp}}",
+      "instance_name": "docker-worker-base-{{uuid}}"
     }
   ]
 }
