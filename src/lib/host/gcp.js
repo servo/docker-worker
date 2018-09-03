@@ -70,23 +70,22 @@ module.exports = {
   @param {String} [baseUrl] optional base url override (for tests).
   @return {Object} configuration values.
   */
-  async configure(projectUrl = PROJECT_URL, instanceUrl = INSTANCE_URL) {
-    log('configure', { projectUrl, instanceUrl });
+  async configure(url = INSTANCE_URL) {
+    log('configure', { url });
 
-    let projectData = await getJsonData(projectUrl);
-    let instanceData = await getJsonData(instanceUrl);
+    let instanceData = await getJsonData(url);
 
     let zone = instanceData.zone.split('/').reverse()[0];
     let instanceType = instanceData.machineType.split('/').reverse()[0];
 
     let config = {
       host: instanceData.hostname,
-      publicIp: instanceData.networkInterfaces[0].accessConfigs.externalIp,
+      publicIp: instanceData.networkInterfaces[0].accessConfigs[0].externalIp,
       privateIp: instanceData.networkInterfaces[0].ip,
-      workerId: instanceData.id,
+      workerId: instanceData.id.toString(),
       workerGroup: zone,
       workerNodeType: instanceType,
-      instanceId: instanceData.id,
+      instanceId: instanceData.id.toString(),
       region: zone,
       instanceType,
       // AWS Specific shutdown parameters notice this can also be overridden.
@@ -98,39 +97,15 @@ module.exports = {
         // the value of a new machine because a) it has already paid the startup
         // cost b) it may have populated caches that can result in subsequent
         // tasks executing faster.
-        afterIdleSeconds: minutes(15),
+        afterIdleSeconds: minutes(10000),
       }
     };
 
     log('metadata', config);
 
-    let userdata = projectData.attributes || {};
-    let securityToken = userdata.securityToken;
-    let provisionerBaseUrl = userdata.provisionerBaseUrl;
+    let userdata = instanceData.attributes || {};
 
     log('read userdata', { text: userdata });
-
-    let provisioner = new taskcluster.AwsProvisioner({
-      baseUrl: provisionerBaseUrl
-    });
-
-    // Retrieve secrets
-    let secrets;
-    try {
-      secrets = await provisioner.getSecret(securityToken);
-    }
-    catch (e) {
-      // It's bad if secrets cannot be retrieved.  Either this could happen when
-      // worker first starts up because of an issue communicating with the provisioner
-      // or if the worker respawned (because of an uncaught exception).  Either way,
-      // alert and set capacity to 0.
-      log('[alert-operator] error retrieving secrets', {stack: e.stack});
-      spawn('shutdown', ['-h', 'now']);
-    }
-
-    log('read secrets');
-
-    await provisioner.removeSecret(securityToken);
 
     // Log config for record of configuration but without secrets
     log('config', config);
@@ -138,11 +113,27 @@ module.exports = {
     // Order of these matter.  We want secret data to override all else, including
     // taskcluster credentials (if perma creds are provided by secrets.data)
     return _.defaultsDeep(
-      secrets.data,
-      {taskcluster: secrets.credentials},
-      userdata.data,
       {
-        capacity: userdata.capacity,
+        taskcluster: {
+          clientId: userdata.clientId,
+          accessToken: userdata.accessToken,
+        },
+      },
+      {
+        features: {
+          relengAPIProxy: {
+            token: userdata.relengApiToken,
+          },
+        },
+        statelessHostname: {
+          secret: userdata.statelessHostname,
+        },
+        dockerConfig: {
+          allowPrivileged: true,
+        },
+      },
+      {
+        capacity: parseInt(userdata.capacity),
         workerType: userdata.workerType,
         provisionerId: userdata.provisionerId
       },
