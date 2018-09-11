@@ -115,7 +115,8 @@
       "zone": "us-west1-b",
       "image_family": "docker-worker-base",
       "image_name": "docker-worker-app-{{timestamp}}",
-      "instance_name": "docker-worker-base-{{uuid}}"
+      "instance_name": "docker-worker-base-{{uuid}}",
+      "image_licenses": ["projects/vm-options/global/licenses/enable-vmx"]
     }
   ],
   "post-processors": [
