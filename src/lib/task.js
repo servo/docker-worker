@@ -162,7 +162,8 @@ function runAsPrivileged(task, allowPrivilegedTasks) {
   let privilegedTask = taskCapabilities.privileged || false;
   if (!privilegedTask) return false;
 
-  if (!scopeMatch(task.scopes, [['docker-worker:capability:privileged']])) {
+  if (!scopeMatch(task.scopes, [['docker-worker:capability:privileged'],
+                                ['project:servo:docker-worker-kvm:capability:privileged']])) {
     throw new Error(
       'Insufficient scopes to run task in privileged mode. Try ' +
       'adding docker-worker:capability:privileged to the .scopes array'
